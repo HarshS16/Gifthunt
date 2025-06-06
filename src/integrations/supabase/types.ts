@@ -9,7 +9,133 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
-      [_ in never]: never
+      gift_results: {
+        Row: {
+          ai_relevance_score: number | null
+          created_at: string
+          description: string | null
+          id: string
+          image_url: string | null
+          name: string
+          price: number
+          product_url: string | null
+          rating: number | null
+          search_id: string | null
+          store_name: string | null
+          tags: string[] | null
+        }
+        Insert: {
+          ai_relevance_score?: number | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          image_url?: string | null
+          name: string
+          price: number
+          product_url?: string | null
+          rating?: number | null
+          search_id?: string | null
+          store_name?: string | null
+          tags?: string[] | null
+        }
+        Update: {
+          ai_relevance_score?: number | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          image_url?: string | null
+          name?: string
+          price?: number
+          product_url?: string | null
+          rating?: number | null
+          search_id?: string | null
+          store_name?: string | null
+          tags?: string[] | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "gift_results_search_id_fkey"
+            columns: ["search_id"]
+            isOneToOne: false
+            referencedRelation: "gift_searches"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      gift_searches: {
+        Row: {
+          budget_max: number
+          budget_min: number
+          created_at: string
+          id: string
+          interests: string[] | null
+          occasion: string
+          personality_type: string | null
+          recipient_age: number | null
+          recipient_gender: string | null
+          relationship: string | null
+          search_query: string | null
+          user_id: string | null
+        }
+        Insert: {
+          budget_max: number
+          budget_min: number
+          created_at?: string
+          id?: string
+          interests?: string[] | null
+          occasion: string
+          personality_type?: string | null
+          recipient_age?: number | null
+          recipient_gender?: string | null
+          relationship?: string | null
+          search_query?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          budget_max?: number
+          budget_min?: number
+          created_at?: string
+          id?: string
+          interests?: string[] | null
+          occasion?: string
+          personality_type?: string | null
+          recipient_age?: number | null
+          recipient_gender?: string | null
+          relationship?: string | null
+          search_query?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
+      user_favorites: {
+        Row: {
+          created_at: string
+          gift_result_id: string | null
+          id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          gift_result_id?: string | null
+          id?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          gift_result_id?: string | null
+          id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_favorites_gift_result_id_fkey"
+            columns: ["gift_result_id"]
+            isOneToOne: false
+            referencedRelation: "gift_results"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
