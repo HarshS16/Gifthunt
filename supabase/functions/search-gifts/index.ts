@@ -45,8 +45,8 @@ serve(async (req) => {
     // Generate AI-powered search query
     const searchQuery = generateSearchQuery(searchParams);
     
-    // Mock web scraping results (in production, you'd implement actual scraping)
-    const giftResults = await generateMockGiftResults(searchParams, searchQuery);
+    // Generate Indian market gift results
+    const giftResults = await generateIndianGiftResults(searchParams, searchQuery);
     
     // Store results in database with AI relevance scores
     const resultsToInsert = giftResults.map(gift => ({
@@ -90,7 +90,7 @@ serve(async (req) => {
 function generateSearchQuery(params: any): string {
   const { occasion, interests, personalityType, relationship, gender, age, budget } = params;
   
-  let query = `${occasion} gift`;
+  let query = `${occasion} gift India`;
   
   if (interests && interests.length > 0) {
     query += ` for ${interests.slice(0, 2).join(' and ')} lover`;
@@ -114,81 +114,103 @@ function generateSearchQuery(params: any): string {
     else query += ' adult';
   }
   
-  query += ` under $${budget[0]}`;
+  query += ` under ₹${budget[0]}`;
   
   return query;
 }
 
-async function generateMockGiftResults(params: any, searchQuery: string) {
-  // This simulates AI-powered web scraping results
-  // In production, you'd implement actual web scraping here
+async function generateIndianGiftResults(params: any, searchQuery: string) {
+  // This generates Indian market-focused gift results with INR pricing
+  // In production, you'd implement actual web scraping for Indian e-commerce sites
   
   const baseGifts = [
     {
-      name: "Premium Wireless Headphones",
+      name: "Premium Wireless Bluetooth Headphones",
       description: "High-quality noise-canceling headphones perfect for music lovers",
-      price: 129.99,
-      image_url: "/placeholder.svg",
-      product_url: "https://example.com/headphones",
-      store_name: "TechStore",
+      price: 2999,
+      image_url: "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=400&h=400&fit=crop",
+      product_url: "https://www.amazon.in/headphones",
+      store_name: "Amazon India",
       rating: 4.8,
       tags: ["electronics", "music", "premium"],
       ai_relevance_score: 0.95
     },
     {
-      name: "Artisan Coffee Subscription",
-      description: "Monthly delivery of premium coffee beans from around the world",
-      price: 45.00,
-      image_url: "/placeholder.svg",
-      product_url: "https://example.com/coffee",
-      store_name: "CoffeeWorld",
+      name: "Artisan Masala Chai Gift Set",
+      description: "Premium tea collection with traditional Indian spices and brewing accessories",
+      price: 899,
+      image_url: "https://images.unsplash.com/photo-1594631661960-69a5789ce67b?w=400&h=400&fit=crop",
+      product_url: "https://www.teabox.com/gift-sets",
+      store_name: "Teabox",
       rating: 4.9,
-      tags: ["coffee", "subscription", "gourmet"],
+      tags: ["tea", "traditional", "gourmet"],
       ai_relevance_score: 0.88
     },
     {
-      name: "Smart Fitness Tracker",
-      description: "Track workouts, heart rate, and sleep patterns with this sleek device",
-      price: 89.99,
-      image_url: "/placeholder.svg",
-      product_url: "https://example.com/fitness",
-      store_name: "FitTech",
+      name: "Smart Fitness Band with Heart Rate Monitor",
+      description: "Track workouts, heart rate, and sleep patterns with this advanced fitness tracker",
+      price: 1999,
+      image_url: "https://images.unsplash.com/photo-1551698618-1dfe5d97d256?w=400&h=400&fit=crop",
+      product_url: "https://www.flipkart.com/fitness-tracker",
+      store_name: "Flipkart",
       rating: 4.6,
       tags: ["fitness", "health", "smart"],
       ai_relevance_score: 0.82
     },
     {
-      name: "Luxury Candle Set",
-      description: "Hand-poured soy candles with essential oils for relaxation",
-      price: 35.00,
-      image_url: "/placeholder.svg",
-      product_url: "https://example.com/candles",
-      store_name: "HomeScents",
+      name: "Handcrafted Aromatherapy Candle Set",
+      description: "Hand-poured soy candles with essential oils for relaxation and meditation",
+      price: 749,
+      image_url: "https://images.unsplash.com/photo-1602874801006-36d71b7cbb73?w=400&h=400&fit=crop",
+      product_url: "https://www.nykaa.com/candles",
+      store_name: "Nykaa",
       rating: 4.7,
-      tags: ["home", "relaxation", "luxury"],
+      tags: ["home", "relaxation", "aromatherapy"],
       ai_relevance_score: 0.79
     },
     {
-      name: "Leather Journal & Pen Set",
-      description: "Handcrafted leather journal with premium fountain pen",
-      price: 42.50,
-      image_url: "/placeholder.svg",
-      product_url: "https://example.com/journal",
-      store_name: "Stationery Plus",
+      name: "Leather-bound Journal with Fountain Pen",
+      description: "Handcrafted leather journal with premium fountain pen for writers",
+      price: 1299,
+      image_url: "https://images.unsplash.com/photo-1544816155-12df9643f363?w=400&h=400&fit=crop",
+      product_url: "https://www.amazon.in/leather-journal",
+      store_name: "Amazon India",
       rating: 4.5,
       tags: ["writing", "leather", "premium"],
       ai_relevance_score: 0.85
     },
     {
-      name: "Gourmet Chocolate Box",
-      description: "Assorted premium chocolates from award-winning chocolatiers",
-      price: 28.99,
-      image_url: "/placeholder.svg",
-      product_url: "https://example.com/chocolate",
-      store_name: "Sweet Treats",
+      name: "Artisan Dark Chocolate Gift Box",
+      description: "Assorted premium chocolates from award-winning Indian chocolatiers",
+      price: 649,
+      image_url: "https://images.unsplash.com/photo-1549007994-cb92caebd54b?w=400&h=400&fit=crop",
+      product_url: "https://www.fabelle.in/gift-boxes",
+      store_name: "Fabelle",
       rating: 4.9,
       tags: ["chocolate", "gourmet", "sweet"],
       ai_relevance_score: 0.91
+    },
+    {
+      name: "Traditional Pashmina Shawl",
+      description: "Authentic Kashmir Pashmina shawl with intricate embroidery work",
+      price: 3499,
+      image_url: "https://images.unsplash.com/photo-1584464491033-06628f3a6b7b?w=400&h=400&fit=crop",
+      product_url: "https://www.kashmirica.com/pashmina",
+      store_name: "Kashmirica",
+      rating: 4.8,
+      tags: ["fashion", "traditional", "luxury"],
+      ai_relevance_score: 0.87
+    },
+    {
+      name: "Yoga Meditation Starter Kit",
+      description: "Complete yoga set with mat, blocks, strap and meditation cushion",
+      price: 1899,
+      image_url: "https://images.unsplash.com/photo-1588286840104-8957b019727f?w=400&h=400&fit=crop",
+      product_url: "https://www.decathlon.in/yoga-kit",
+      store_name: "Decathlon",
+      rating: 4.6,
+      tags: ["fitness", "yoga", "wellness"],
+      ai_relevance_score: 0.83
     }
   ];
 
@@ -221,6 +243,14 @@ async function generateMockGiftResults(params: any, searchQuery: string) {
       if (params.personalityType === 'Practical' && gift.tags.includes('useful')) {
         score += 0.15;
       }
+    }
+    
+    // Add cultural relevance for Indian occasions
+    if (params.occasion === 'Diwali' && gift.tags.includes('traditional')) {
+      score += 0.2;
+    }
+    if (params.occasion === 'Holi' && gift.tags.includes('colorful')) {
+      score += 0.2;
     }
     
     return { ...gift, ai_relevance_score: Math.min(score, 1.0) };

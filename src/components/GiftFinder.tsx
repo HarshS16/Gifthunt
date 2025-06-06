@@ -17,7 +17,7 @@ interface GiftFinderProps {
 export const GiftFinder = ({ onSearch, isSearching }: GiftFinderProps) => {
   const [formData, setFormData] = useState({
     occasion: '',
-    budget: [50],
+    budget: [1000], // Starting at ₹1000
     recipient: '',
     age: '',
     gender: '',
@@ -27,15 +27,16 @@ export const GiftFinder = ({ onSearch, isSearching }: GiftFinderProps) => {
   });
 
   const occasions = [
-    'Birthday', 'Anniversary', 'Wedding', 'Christmas', 'Valentine\'s Day',
-    'Mother\'s Day', 'Father\'s Day', 'Graduation', 'New Job', 'Housewarming',
-    'Baby Shower', 'Retirement', 'Just Because'
+    'Birthday', 'Anniversary', 'Wedding', 'Diwali', 'Holi',
+    'Valentine\'s Day', 'Mother\'s Day', 'Father\'s Day', 'Graduation', 'New Job', 'Housewarming',
+    'Baby Shower', 'Retirement', 'Raksha Bandhan', 'Karva Chauth', 'Just Because'
   ];
 
   const interestOptions = [
     'Technology', 'Sports', 'Music', 'Art', 'Cooking', 'Reading',
     'Fitness', 'Travel', 'Gaming', 'Fashion', 'Home Decor', 'Gardening',
-    'Photography', 'Movies', 'Coffee', 'Wine', 'Outdoor Activities'
+    'Photography', 'Movies', 'Coffee', 'Tea', 'Outdoor Activities', 'Cricket',
+    'Bollywood', 'Traditional Crafts'
   ];
 
   const relationships = [
@@ -141,20 +142,20 @@ export const GiftFinder = ({ onSearch, isSearching }: GiftFinderProps) => {
 
           {/* Budget */}
           <div className="space-y-4">
-            <Label className="text-white font-medium">Budget Range</Label>
+            <Label className="text-white font-medium">Budget Range (Indian Rupees)</Label>
             <div className="px-4">
               <Slider
                 value={formData.budget}
                 onValueChange={(value) => setFormData(prev => ({ ...prev, budget: value }))}
-                max={500}
-                min={5}
-                step={5}
+                max={10000}
+                min={100}
+                step={100}
                 className="w-full"
               />
               <div className="flex justify-between text-sm text-gray-400 mt-2">
-                <span>$5</span>
-                <span className="text-white font-medium">${formData.budget[0]}</span>
-                <span>$500+</span>
+                <span>₹100</span>
+                <span className="text-white font-medium">₹{formData.budget[0].toLocaleString('en-IN')}</span>
+                <span>₹10,000+</span>
               </div>
             </div>
           </div>

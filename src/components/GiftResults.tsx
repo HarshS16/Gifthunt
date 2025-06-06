@@ -77,7 +77,7 @@ export const GiftResults = ({ results, onReset }: GiftResultsProps) => {
             Perfect Gifts for {results.occasion}
           </h2>
           <p className="text-gray-300 mt-1">
-            Found {results.gifts.length} amazing gifts within your budget of ${results.budget[0]}
+            Found {results.gifts.length} amazing gifts within your budget of ₹{results.budget[0].toLocaleString('en-IN')}
           </p>
         </div>
         
@@ -136,7 +136,7 @@ export const GiftResults = ({ results, onReset }: GiftResultsProps) => {
               </Button>
               <div className="absolute bottom-2 left-2">
                 <Badge className="bg-green-600 text-white">
-                  ${gift.price.toFixed(2)}
+                  ₹{gift.price.toLocaleString('en-IN')}
                 </Badge>
               </div>
             </div>
