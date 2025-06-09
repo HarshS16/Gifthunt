@@ -38,39 +38,43 @@ serve(async (req) => {
       .single();
 
     if (searchError) {
-      throw new Error(`Search storage failed: ${searchError.message}`);
+      console.error('Search storage error:', searchError);
+      // Continue with search even if storage fails
     }
 
     // Generate search query and get results from Google CSE
     const searchQuery = generateSearchQuery(searchParams);
+    console.log('Generated search query:', searchQuery);
+    
     const giftResults = await searchWithGoogleCSE(searchQuery, searchParams.budget[0]);
     
-    // Store results in database with AI relevance scores
-    const resultsToInsert = giftResults.map(gift => ({
-      search_id: searchData.id,
-      name: gift.name,
-      description: gift.description,
-      price: gift.price,
-      image_url: gift.image_url,
-      product_url: gift.product_url,
-      store_name: gift.store_name,
-      rating: gift.rating,
-      tags: gift.tags,
-      ai_relevance_score: gift.ai_relevance_score
-    }));
+    // Store results in database with AI relevance scores (only if search was stored)
+    if (searchData && giftResults.length > 0) {
+      const resultsToInsert = giftResults.map(gift => ({
+        search_id: searchData.id,
+        name: gift.name,
+        description: gift.description,
+        price: gift.price,
+        image_url: gift.image_url,
+        product_url: gift.product_url,
+        store_name: gift.store_name,
+        rating: gift.rating,
+        tags: gift.tags,
+        ai_relevance_score: gift.ai_relevance_score
+      }));
 
-    const { data: resultsData, error: resultsError } = await supabase
-      .from('gift_results')
-      .insert(resultsToInsert)
-      .select();
+      const { error: resultsError } = await supabase
+        .from('gift_results')
+        .insert(resultsToInsert);
 
-    if (resultsError) {
-      throw new Error(`Results storage failed: ${resultsError.message}`);
+      if (resultsError) {
+        console.error('Results storage error:', resultsError);
+      }
     }
 
     return new Response(JSON.stringify({
-      searchId: searchData.id,
-      results: resultsData
+      searchId: searchData?.id || null,
+      results: giftResults
     }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
@@ -93,7 +97,7 @@ function generateSearchQuery(params: any): string {
     query += ` for ${interests.slice(0, 2).join(' and ')} lover`;
   }
   
-  if (relationship) {
+  if (relationship && relationship !== 'prefer-not-to-say') {
     query += ` for ${relationship}`;
   }
   
@@ -101,7 +105,7 @@ function generateSearchQuery(params: any): string {
     query += ` ${gender}`;
   }
   
-  query += ` under ₹${budget[0]} India`;
+  query += ` under ₹${budget} India`;
   
   return query;
 }
@@ -109,6 +113,9 @@ function generateSearchQuery(params: any): string {
 async function searchWithGoogleCSE(query: string, budget: number) {
   const CSE_ID = Deno.env.get('GOOGLE_CSE_ID');
   const API_KEY = Deno.env.get('GOOGLE_API_KEY');
+  
+  console.log('CSE_ID available:', !!CSE_ID);
+  console.log('API_KEY available:', !!API_KEY);
   
   if (!CSE_ID || !API_KEY) {
     console.log('Google CSE credentials not found, using fallback data');
@@ -119,21 +126,30 @@ async function searchWithGoogleCSE(query: string, budget: number) {
     // Search with site restrictions for Indian e-commerce
     const searchQuery = `${query} site:amazon.in OR site:flipkart.com OR site:myntra.com OR site:nykaa.com OR site:ajio.com`;
     
-    const url = `https://www.googleapis.com/customsearch/v1?key=${API_KEY}&cx=${CSE_ID}&q=${encodeURIComponent(searchQuery)}&num=10`;
+    const url = `https://www.googleapis.com/customsearch/v1?key=${API_KEY}&cx=${CSE_ID}&q=${encodeURIComponent(searchQuery)}&num=10&searchType=image`;
     
+    console.log('Making request to Google CSE API...');
     const response = await fetch(url);
     
     if (!response.ok) {
-      throw new Error(`Google CSE API error: ${response.statusText}`);
-    }
-    
-    const data = await response.json();
-    
-    if (!data.items || data.items.length === 0) {
+      console.error(`Google CSE API error: ${response.status} ${response.statusText}`);
+      const errorText = await response.text();
+      console.error('Error response:', errorText);
       return generateFallbackResults(budget);
     }
     
-    return transformGoogleResults(data.items, budget);
+    const data = await response.json();
+    console.log(`Google CSE returned ${data.items?.length || 0} results`);
+    
+    if (!data.items || data.items.length === 0) {
+      console.log('No results from Google CSE, using fallback data');
+      return generateFallbackResults(budget);
+    }
+    
+    const transformedResults = transformGoogleResults(data.items, budget);
+    console.log(`Transformed ${transformedResults.length} results`);
+    
+    return transformedResults;
     
   } catch (error) {
     console.error('Google CSE search failed:', error);
@@ -146,13 +162,15 @@ function transformGoogleResults(results: any[], budget: number) {
     // Extract price from title or snippet
     const price = extractPriceFromText(`${result.title} ${result.snippet}`, budget);
     
-    // Extract image URL
-    const imageUrl = result.pagemap?.cse_image?.[0]?.src || 
-                    result.pagemap?.metatags?.[0]?.['og:image'] ||
+    // Use the actual image from Google search results
+    const imageUrl = result.link || result.image?.thumbnailLink || 
                     'https://images.unsplash.com/photo-1549007994-cb92caebd54b?w=400&h=400&fit=crop';
     
-    // Determine store name from URL
-    const storeName = getStoreName(result.link);
+    // Get the original page URL (where the product is sold)
+    const productUrl = result.image?.contextLink || result.displayLink || '#';
+    
+    // Determine store name from the context URL
+    const storeName = getStoreName(productUrl);
     
     // Generate tags based on content
     const tags = generateTags(result.title, result.snippet);
@@ -163,7 +181,7 @@ function transformGoogleResults(results: any[], budget: number) {
       description: result.snippet || 'Product from Indian e-commerce store',
       price: price,
       image_url: imageUrl,
-      product_url: result.link,
+      product_url: productUrl,
       store_name: storeName,
       rating: 3.5 + Math.random() * 1.5,
       tags: tags,
@@ -177,7 +195,9 @@ function extractPriceFromText(text: string, budget: number): number {
   const pricePatterns = [
     /₹[\s]*([0-9,]+)/,
     /Rs\.?[\s]*([0-9,]+)/,
-    /INR[\s]*([0-9,]+)/
+    /INR[\s]*([0-9,]+)/,
+    /Price[\s]*:[\s]*₹[\s]*([0-9,]+)/i,
+    /MRP[\s]*:[\s]*₹[\s]*([0-9,]+)/i
   ];
   
   for (const pattern of pricePatterns) {
@@ -222,13 +242,15 @@ function generateTags(title: string, snippet: string): string[] {
   const text = `${title} ${snippet}`.toLowerCase();
   const tags = [];
   
-  if (text.includes('electronic') || text.includes('gadget')) tags.push('electronics');
-  if (text.includes('fashion') || text.includes('cloth')) tags.push('fashion');
+  if (text.includes('electronic') || text.includes('gadget') || text.includes('phone') || text.includes('laptop')) tags.push('electronics');
+  if (text.includes('fashion') || text.includes('cloth') || text.includes('dress') || text.includes('shirt')) tags.push('fashion');
   if (text.includes('book')) tags.push('books');
-  if (text.includes('beauty') || text.includes('cosmetic')) tags.push('beauty');
-  if (text.includes('home') || text.includes('decor')) tags.push('home');
+  if (text.includes('beauty') || text.includes('cosmetic') || text.includes('makeup')) tags.push('beauty');
+  if (text.includes('home') || text.includes('decor') || text.includes('furniture')) tags.push('home');
   if (text.includes('gift')) tags.push('gifts');
   if (text.includes('premium') || text.includes('luxury')) tags.push('premium');
+  if (text.includes('watch') || text.includes('jewelry')) tags.push('accessories');
+  if (text.includes('fitness') || text.includes('gym') || text.includes('exercise')) tags.push('fitness');
   
   return tags.length > 0 ? tags : ['general'];
 }
@@ -236,6 +258,7 @@ function generateTags(title: string, snippet: string): string[] {
 function generateFallbackResults(budget: number) {
   const baseGifts = [
     {
+      id: `fallback-${Date.now()}-1`,
       name: "Premium Wireless Bluetooth Headphones",
       description: "High-quality noise-canceling headphones perfect for music lovers",
       price: 2999,
@@ -247,6 +270,7 @@ function generateFallbackResults(budget: number) {
       ai_relevance_score: 0.95
     },
     {
+      id: `fallback-${Date.now()}-2`,
       name: "Artisan Masala Chai Gift Set",
       description: "Premium tea collection with traditional Indian spices and brewing accessories",
       price: 899,
@@ -258,6 +282,7 @@ function generateFallbackResults(budget: number) {
       ai_relevance_score: 0.88
     },
     {
+      id: `fallback-${Date.now()}-3`,
       name: "Smart Fitness Band with Heart Rate Monitor",
       description: "Track workouts, heart rate, and sleep patterns with this advanced fitness tracker",
       price: 1999,
@@ -269,6 +294,7 @@ function generateFallbackResults(budget: number) {
       ai_relevance_score: 0.82
     },
     {
+      id: `fallback-${Date.now()}-4`,
       name: "Handcrafted Aromatherapy Candle Set",
       description: "Hand-poured soy candles with essential oils for relaxation and meditation",
       price: 749,
@@ -280,6 +306,7 @@ function generateFallbackResults(budget: number) {
       ai_relevance_score: 0.79
     },
     {
+      id: `fallback-${Date.now()}-5`,
       name: "Leather-bound Journal with Fountain Pen",
       description: "Handcrafted leather journal with premium fountain pen for writers",
       price: 1299,
@@ -289,39 +316,6 @@ function generateFallbackResults(budget: number) {
       rating: 4.5,
       tags: ["writing", "leather", "premium"],
       ai_relevance_score: 0.85
-    },
-    {
-      name: "Artisan Dark Chocolate Gift Box",
-      description: "Assorted premium chocolates from award-winning Indian chocolatiers",
-      price: 649,
-      image_url: "https://images.unsplash.com/photo-1549007994-cb92caebd54b?w=400&h=400&fit=crop",
-      product_url: "https://www.fabelle.in/gift-boxes",
-      store_name: "Fabelle",
-      rating: 4.9,
-      tags: ["chocolate", "gourmet", "sweet"],
-      ai_relevance_score: 0.91
-    },
-    {
-      name: "Traditional Pashmina Shawl",
-      description: "Authentic Kashmir Pashmina shawl with intricate embroidery work",
-      price: 3499,
-      image_url: "https://images.unsplash.com/photo-1584464491033-06628f3a6b7b?w=400&h=400&fit=crop",
-      product_url: "https://www.kashmirica.com/pashmina",
-      store_name: "Kashmirica",
-      rating: 4.8,
-      tags: ["fashion", "traditional", "luxury"],
-      ai_relevance_score: 0.87
-    },
-    {
-      name: "Yoga Meditation Starter Kit",
-      description: "Complete yoga set with mat, blocks, strap and meditation cushion",
-      price: 1899,
-      image_url: "https://images.unsplash.com/photo-1588286840104-8957b019727f?w=400&h=400&fit=crop",
-      product_url: "https://www.decathlon.in/yoga-kit",
-      store_name: "Decathlon",
-      rating: 4.6,
-      tags: ["fitness", "yoga", "wellness"],
-      ai_relevance_score: 0.83
     }
   ];
   
