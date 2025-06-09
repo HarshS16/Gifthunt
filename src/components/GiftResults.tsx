@@ -1,10 +1,11 @@
-
 import { useState } from 'react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Star, ExternalLink, Heart, ArrowLeft, Filter, SortAsc } from 'lucide-react';
+import { Star, ExternalLink, Heart, ArrowLeft, Filter, SortAsc, AlertCircle } from 'lucide-react';
+import { GoogleCSESetup } from './GoogleCSESetup';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 
 interface Gift {
   id: number;
@@ -60,8 +61,31 @@ export const GiftResults = ({ results, onReset }: GiftResultsProps) => {
 
   const allTags = [...new Set(results.gifts.flatMap(gift => gift.tags))];
 
+  // Check if we have real search results or fallback data
+  const hasRealResults = results.gifts.some(gift => 
+    gift.url.includes('amazon.in') || 
+    gift.url.includes('flipkart.com') || 
+    gift.url.includes('myntra.com') ||
+    gift.url.includes('nykaa.com')
+  );
+
   return (
     <div className="space-y-6">
+      {/* Show setup guide if using fallback data */}
+      {!hasRealResults && (
+        <GoogleCSESetup />
+      )}
+      
+      {/* Search Results Info */}
+      {!hasRealResults && (
+        <Alert className="bg-amber-50 border-amber-200">
+          <AlertCircle className="h-4 w-4 text-amber-600" />
+          <AlertDescription className="text-amber-800">
+            Currently showing sample products. Set up Google CSE to get real product listings from Indian e-commerce sites.
+          </AlertDescription>
+        </Alert>
+      )}
+
       {/* Header */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div>
@@ -78,6 +102,7 @@ export const GiftResults = ({ results, onReset }: GiftResultsProps) => {
           </h2>
           <p className="text-gray-300 mt-1">
             Found {results.gifts.length} amazing gifts within your budget of ₹{results.budget[0].toLocaleString('en-IN')}
+            {hasRealResults && ' from top Indian e-commerce sites'}
           </p>
         </div>
         
