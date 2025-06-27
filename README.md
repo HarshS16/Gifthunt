@@ -1,73 +1,61 @@
-# Welcome to your Lovable project
+# 🎁 GiftHunt
 
-## Project info
+**GiftHunt** is an AI-powered gift discovery platform that helps you find the perfect gift — based on the occasion, budget, relationship, and interests. Instead of endless scrolling through e-commerce sites, GiftHunt intelligently hunts down thoughtful gifts across the web and delivers tailored suggestions to you.
 
-**URL**: https://lovable.dev/projects/8757f120-69d0-4090-a128-f02ab62007dc
+> "Smart gifting, simplified."
 
-## How can I edit this code?
+---
 
-There are several ways of editing your application.
+## 🔍 What It Does
 
-**Use Lovable**
+- 🧠 **AI-Powered Querying**: Converts your input into meaningful search queries using natural language understanding.
+- 🌐 **Web-Powered Gift Search**: Uses Google Programmable Search to fetch live gift suggestions from top platforms like Amazon, Flipkart, Nykaa, and more.
+- 🎯 **Highly Relevant Results**: Filters and ranks gifts based on budget, type, and occasion.
+- 💝 **Personalized Experience**: Get suggestions tailored to the age, gender, and interests of the person you're buying for.
+- ⚡ **Fast & Intuitive UI**: A smooth, mobile-first web experience powered by React & Tailwind.
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/8757f120-69d0-4090-a128-f02ab62007dc) and start prompting.
+---
 
-Changes made via Lovable will be committed automatically to this repo.
+## ✨ Features
 
-**Use your preferred IDE**
+| Feature                      | Description                                                   |
+|-----------------------------|---------------------------------------------------------------|
+| 🎂 Occasion-based filtering   | Birthday, Anniversary, Diwali, Graduation, and more          |
+| 💸 Budget control             | Set min-max budget ranges for precise recommendations         |
+| 🧑‍🤝‍🧑 Relationship awareness   | Gifts for Mom, Dad, Friend, Partner, Colleague, etc.         |
+| ⚙️ Real-time web integration | No scraping — legal and safe via Google CSE                  |
+| 🔎 NLP-based optimization     | Smart query generation using AI for better search results     |
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+---
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
+## 🛠️ Tech Stack
 
-Follow these steps:
+| Layer        | Stack                              |
+|--------------|-------------------------------------|
+| Frontend     | React.js, Tailwind CSS              |
+| Backend      | Node.js / FastAPI (planned)         |
+| AI Layer     | OpenAI API / NLP Techniques         |
+| Search Engine| Google Programmable Search (CSE)    |
+| Hosting      | Vercel / Netlify                    |
 
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
+---
 
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
+## 🚧 How It Works
 
-# Step 3: Install the necessary dependencies.
-npm i
+1. User enters input: `Occasion`, `Relationship`, `Budget`, `Age`, etc.
+2. GiftHunt generates a refined query using AI logic.
+3. Google CSE fetches gift listings from selected e-commerce platforms.
+4. Backend filters, ranks, and returns the most suitable gifts.
+5. User views a curated list of top gift recommendations.
 
-# Step 4: Start the development server with auto-reloading and an instant preview.
-npm run dev
-```
+---
 
-**Edit a file directly in GitHub**
+## 🧠 What's Next
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+- 🤖 AI-powered re-ranking of results (using embeddings or OpenAI)
+- 🛍️ Affiliate integration for monetization (Amazon/Flipkart APIs)
+- 📥 Wishlist feature for saving gifts
+- 📧 Shareable gift lists (via link/email)
+- 📸 Image-based suggestions (coming soon)
 
-**Use GitHub Codespaces**
-
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
-
-## What technologies are used for this project?
-
-This project is built with:
-
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
-
-## How can I deploy this project?
-
-Simply open [Lovable](https://lovable.dev/projects/8757f120-69d0-4090-a128-f02ab62007dc) and click on Share -> Publish.
-
-## Can I connect a custom domain to my Lovable project?
-
-Yes, you can!
-
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
-
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/tips-tricks/custom-domain#step-by-step-guide)
+---
